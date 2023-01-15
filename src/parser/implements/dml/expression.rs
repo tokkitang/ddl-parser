@@ -67,10 +67,7 @@ impl Parser {
                     break;
                 }
                 _ => {
-                    return Err(ParsingError::boxed(format!(
-                        "E0202 unexpected token: {:?}",
-                        current_token
-                    )))
+                    break;
                 }
             }
         }
