@@ -103,7 +103,8 @@ impl Parser {
                     }
                 }
                 Token::Default => {
-                    return Err(ParsingError::boxed("not supported yet"));
+                    let default_value = self.parse_expression(ParserContext::default())?;
+                    builder = builder.set_default(default_value);
                 }
                 _ => {}
             }

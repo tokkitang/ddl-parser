@@ -64,6 +64,11 @@ impl Parser {
                     }
                 }
                 Token::RightParentheses => {
+                    self.unget_next_token(current_token);
+                    break;
+                }
+                Token::Comma => {
+                    self.unget_next_token(current_token);
                     break;
                 }
                 _ => {
