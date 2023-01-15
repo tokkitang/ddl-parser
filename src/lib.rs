@@ -1,20 +1,20 @@
-#[path = "ast/mod.rs"]
+#[path = "./ast/mod.rs"]
 pub mod ast;
 
-#[path = "constants/mod.rs"]
+#[path = "./constants/mod.rs"]
 pub mod constants;
 
-#[path = "errors/mod.rs"]
+#[path = "./errors/mod.rs"]
 pub mod errors;
 
-#[path = "lexer/mod.rs"]
+#[path = "./lexer/mod.rs"]
 pub mod lexer;
 
-#[path = "logger/mod.rs"]
+#[path = "./logger/mod.rs"]
 pub mod logger;
 
-#[path = "parser/mod.rs"]
+#[path = "./parser/mod.rs"]
 pub mod parser;
 
-#[path = "utils/mod.rs"]
+#[path = "./utils/mod.rs"]
 pub mod utils;

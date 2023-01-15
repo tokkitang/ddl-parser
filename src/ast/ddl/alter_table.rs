@@ -1,5 +1,5 @@
 //use crate::ast::enums::SQLStatement;
-use crate::ast::predule::{Column, DataType, SQLExpression, SQLStatement, TableName};
+use crate::ast::predule::{Column, DataType, SQLStatement, TableName};
 
 use super::DDLStatement;
 
@@ -159,7 +159,7 @@ impl From<AlterColumnDropNotNull> for AlterColumnAction {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AlterColumnSetDefault {
-    pub expression: SQLExpression,
+    pub expression: String,
 }
 
 impl From<AlterColumnSetDefault> for AlterColumnAction {

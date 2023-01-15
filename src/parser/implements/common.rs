@@ -1,8 +1,6 @@
 use std::error::Error;
 
-use crate::ast::predule::{
-    Column, DataType, JoinType, SelectColumn, SubqueryExpression, TableName,
-};
+use crate::ast::predule::{Column, DataType, TableName};
 use crate::errors::predule::ParsingError;
 use crate::lexer::predule::{OperatorToken, Token};
 use crate::parser::predule::{Parser, ParserContext};
@@ -314,50 +312,6 @@ impl Parser {
         } else {
             self.unget_next_token(current_token);
             Ok(false)
-        }
-    }
-
-    // SELECT 컬럼 정의 분석
-    pub(crate) fn parse_select_column(&mut self) -> Result<SelectColumn, Box<dyn Error + Send>> {
-        let mut select_column = SelectColumn::new(None, "".to_string());
-
-        if !self.has_next_token() {
-            return Err(ParsingError::boxed("E0018 need more tokens"));
-        }
-
-        let current_token = self.get_next_token();
-
-        if let Token::Identifier(name) = current_token {
-            select_column.column_name = name;
-        } else {
-            return Err(ParsingError::boxed(format!(
-                "E0032 expected identifier. but your input word is '{:?}'",
-                current_token
-            )));
-        }
-
-        if !self.has_next_token() {
-            Ok(select_column)
-        } else {
-            let current_token = self.get_next_token();
-
-            if current_token == Token::Period {
-                let current_token = self.get_next_token();
-
-                if let Token::Identifier(name) = current_token {
-                    select_column.table_name = Some(select_column.column_name);
-                    select_column.column_name = name;
-                    Ok(select_column)
-                } else {
-                    Err(ParsingError::boxed(format!(
-                        "E0033 expected identifier. but your input word is '{:?}'",
-                        current_token
-                    )))
-                }
-            } else {
-                self.unget_next_token(current_token);
-                Ok(select_column)
-            }
         }
     }
 
@@ -819,7 +773,7 @@ impl Parser {
         }
     }
 
-    // 다음 토큰이 COLUMN인지
+    // 다음 토큰이 default인지
     pub(crate) fn next_token_is_default(&mut self) -> bool {
         if !self.has_next_token() {
             false
@@ -837,194 +791,5 @@ impl Parser {
                 }
             }
         }
-    }
-
-    // 다음 토큰이 JOIN 토큰이라면 JOIN 타입을 추출해서 반환
-    pub(crate) fn get_next_join_type(&mut self) -> Option<JoinType> {
-        if !self.has_next_token() {
-            None
-        } else {
-            let current_token = self.get_next_token();
-
-            match current_token {
-                Token::Inner => {
-                    if !self.has_next_token() {
-                        self.unget_next_token(current_token);
-                        None
-                    } else {
-                        let second_token = self.get_next_token();
-
-                        match second_token {
-                            Token::Join => Some(JoinType::InnerJoin),
-                            _ => {
-                                self.unget_next_token(second_token);
-                                self.unget_next_token(current_token);
-                                None
-                            }
-                        }
-                    }
-                }
-                Token::Left | Token::Right => {
-                    if !self.has_next_token() {
-                        self.unget_next_token(current_token);
-                        None
-                    } else {
-                        let second_token = self.get_next_token();
-
-                        match second_token {
-                            Token::Join => match current_token {
-                                Token::Left => Some(JoinType::LeftOuterJoin),
-                                Token::Right => Some(JoinType::RightOuterJoin),
-                                _ => unreachable!(),
-                            },
-                            Token::Outer => {
-                                if !self.has_next_token() {
-                                    self.unget_next_token(second_token);
-                                    self.unget_next_token(current_token);
-                                    None
-                                } else {
-                                    let third_token = self.get_next_token();
-
-                                    match third_token {
-                                        Token::Join => match current_token {
-                                            Token::Left => Some(JoinType::LeftOuterJoin),
-                                            Token::Right => Some(JoinType::RightOuterJoin),
-                                            _ => unreachable!(),
-                                        },
-                                        _ => {
-                                            self.unget_next_token(third_token);
-                                            self.unget_next_token(second_token);
-                                            self.unget_next_token(current_token);
-                                            None
-                                        }
-                                    }
-                                }
-                            }
-                            _ => {
-                                self.unget_next_token(second_token);
-                                self.unget_next_token(current_token);
-                                None
-                            }
-                        }
-                    }
-                }
-                Token::Full => {
-                    if !self.has_next_token() {
-                        self.unget_next_token(current_token);
-                        None
-                    } else {
-                        let second_token = self.get_next_token();
-
-                        match second_token {
-                            Token::Join => Some(JoinType::FullOuterJoin),
-                            Token::Outer => {
-                                if !self.has_next_token() {
-                                    self.unget_next_token(current_token);
-                                    None
-                                } else {
-                                    let third_token = self.get_next_token();
-
-                                    match third_token {
-                                        Token::Join => Some(JoinType::FullOuterJoin),
-                                        _ => {
-                                            self.unget_next_token(third_token);
-                                            self.unget_next_token(second_token);
-                                            self.unget_next_token(current_token);
-                                            None
-                                        }
-                                    }
-                                }
-                            }
-                            _ => {
-                                self.unget_next_token(second_token);
-                                self.unget_next_token(current_token);
-                                None
-                            }
-                        }
-                    }
-                }
-                Token::Join => Some(JoinType::InnerJoin),
-                _ => {
-                    self.unget_next_token(current_token);
-                    None
-                }
-            }
-        }
-    }
-
-    // Table Alias 획득
-    pub(crate) fn parse_table_alias(&mut self) -> Result<String, Box<dyn Error + Send>> {
-        // 테이블명 획득 로직
-        if !self.has_next_token() {
-            return Err(ParsingError::boxed("E0024 need more tokens"));
-        }
-
-        let current_token = self.get_next_token();
-
-        match current_token {
-            Token::As => {
-                if !self.has_next_token() {
-                    return Err(ParsingError::boxed("E0026 need more tokens"));
-                }
-
-                let current_token = self.get_next_token();
-
-                match current_token {
-                    Token::Identifier(id) => Ok(id),
-                    _ => Err(ParsingError::boxed(format!(
-                        "E0027 expected identifier. but your input is {:?}",
-                        current_token
-                    ))),
-                }
-            }
-            Token::Identifier(id) => Ok(id),
-            _ => Err(ParsingError::boxed(format!(
-                "E0025 expected AS. but your input is {:?}",
-                current_token
-            ))),
-        }
-    }
-
-    // 서브쿼리 분석
-    pub(crate) fn parse_subquery(
-        &mut self,
-        context: ParserContext,
-    ) -> Result<SubqueryExpression, Box<dyn Error + Send>> {
-        if !self.has_next_token() {
-            return Err(ParsingError::boxed("E0019 need more tokens"));
-        }
-
-        // ( 삼킴
-        let current_token = self.get_next_token();
-
-        if current_token != Token::LeftParentheses {
-            return Err(ParsingError::boxed(format!(
-                "E0020 expected left parentheses. but your input is {:?}",
-                current_token
-            )));
-        }
-
-        if !self.has_next_token() {
-            return Err(ParsingError::boxed("E0021 need more tokens"));
-        }
-
-        // 서브쿼리 파싱
-        let select = self.handle_select_query(context)?;
-
-        if !self.has_next_token() {
-            return Err(ParsingError::boxed("E0022 need more tokens"));
-        }
-
-        // ) 삼킴
-        let current_token = self.get_next_token();
-
-        if current_token != Token::RightParentheses {
-            return Err(ParsingError::boxed(format!(
-                "E0023 expected right parentheses. but your input is {:?}",
-                current_token
-            )));
-        }
-
-        Ok(select.into())
     }
 }

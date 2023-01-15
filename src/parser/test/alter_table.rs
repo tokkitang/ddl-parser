@@ -4,8 +4,7 @@ use crate::ast::ddl::{
     AlterColumnSetType, AlterTableAlterColumn, AlterTableDropColumn, AlterTableRenameColumn,
 };
 use crate::ast::predule::{
-    AlterTableAddColumn, AlterTableQuery, AlterTableRenameTo, Column, DataType, SQLExpression,
-    TableName,
+    AlterTableAddColumn, AlterTableQuery, AlterTableRenameTo, Column, DataType, TableName,
 };
 use crate::parser::predule::{Parser, ParserContext};
 
@@ -292,7 +291,7 @@ pub fn alter_table_alter_column_set_default_1() {
             AlterTableAlterColumn {
                 column_name: "id".into(),
                 action: AlterColumnSetDefault {
-                    expression: SQLExpression::Integer(0),
+                    expression: "0".to_owned(),
                 }
                 .into(),
             }

@@ -72,3 +72,22 @@ impl TryInto<UnaryOperator> for OperatorToken {
         }
     }
 }
+
+impl std::fmt::Display for OperatorToken {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let text = match self {
+            Self::Plus => "+",
+            Self::Minus => "-",
+            Self::Asterisk => "*",
+            Self::Slash => "/",
+            Self::Lt => "<",
+            Self::Gt => ">",
+            Self::Lte => "<=",
+            Self::Gte => ">=",
+            Self::Eq => "=",
+            Self::Neq => "!=",
+            Self::Not => "!",
+        };
+        write!(f, "{}", text)
+    }
+}

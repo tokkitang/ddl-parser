@@ -1,14 +1,12 @@
 use crate::ast::predule::DataType;
 use serde::{Deserialize, Serialize};
 
-use super::expression::SQLExpression;
-
 #[derive(Deserialize, Serialize, Clone, Debug, PartialEq)]
 pub struct Column {
     pub name: String,
     pub data_type: DataType,
     pub comment: String,
-    pub default: Option<SQLExpression>,
+    pub default: Option<String>,
     pub not_null: bool,
     pub primary_key: bool,
 }
@@ -24,7 +22,7 @@ pub struct ColumnBuilder {
     name: Option<String>,
     data_type: Option<DataType>,
     comment: Option<String>,
-    default: Option<SQLExpression>,
+    default: Option<String>,
     not_null: Option<bool>,
     primary_key: Option<bool>,
 }
@@ -45,7 +43,7 @@ impl ColumnBuilder {
         self
     }
 
-    pub fn set_default(mut self, default: SQLExpression) -> Self {
+    pub fn set_default(mut self, default: String) -> Self {
         self.default = Some(default);
         self
     }

@@ -1,4 +1,3 @@
-use crate::ast::predule::{FromClause, FromTarget};
 use serde::{Deserialize, Serialize};
 
 // [database_name.]table_name
@@ -14,15 +13,6 @@ impl TableName {
         TableName {
             database_name,
             table_name,
-        }
-    }
-}
-
-impl From<TableName> for FromClause {
-    fn from(value: TableName) -> FromClause {
-        FromClause {
-            from: FromTarget::Table(value),
-            alias: None,
         }
     }
 }
